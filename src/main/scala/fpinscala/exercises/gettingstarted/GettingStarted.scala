@@ -36,13 +36,11 @@ object MyProgram:
   // Exercise 1: Write a function to compute the nth fibonacci number
 
   def fib(n: Int): Int =
-    val f1 = 0
-    val f2 = 1
     @tailrec
-    def go(n: Int, f1: Int, f2: Int): Int =
-      if n == 0 then f1
-      else go((n-1), (f2+f1), f2)
-    go(n, f1, f2)
+    def go(n: Int, current: Int, next: Int): Int =
+      if n <= 0 then current
+      else go(n-1, next, next + current)
+    go(n, 0,  1)
 
 
   // This definition and `formatAbs` are very similar..
@@ -131,7 +129,13 @@ object PolymorphicFunctions:
 
   // Exercise 2: Implement a polymorphic function to check whether
   // an `Array[A]` is sorted
-  def isSorted[A](as: Array[A], gt: (A, A) => Boolean): Boolean = ???
+  def isSorted[A](as: Array[A], gt: (A, A) => Boolean): Boolean =
+    @annotation.tailrec
+    def go(n: Int): Boolean =
+      if n + 1 >= as.length then true
+      else if gt(as(n), as(n+1)) then false
+      else go(n + 1)
+    go(0)
 
   // Polymorphic functions are often so constrained by their type
   // that they only have one implementation! Here's an example:
@@ -144,13 +148,13 @@ object PolymorphicFunctions:
   // Note that `=>` associates to the right, so we could
   // write the return type as `A => B => C`
   def curry[A,B,C](f: (A, B) => C): A => (B => C) =
-    ???
+    a => b => f(a, b)
 
   // NB: The `Function2` trait has a `curried` method already
 
   // Exercise 4: Implement `uncurry`
   def uncurry[A,B,C](f: A => B => C): (A, B) => C =
-    ???
+    (a, b) => f(a)(b)
 
   /*
   NB: There is a method on the `Function` object in the standard library,
@@ -165,5 +169,5 @@ object PolymorphicFunctions:
   // Exercise 5: Implement `compose`
 
   def compose[A,B,C](f: B => C, g: A => B): A => C =
-    ???
+    a => f(g(a))
 
