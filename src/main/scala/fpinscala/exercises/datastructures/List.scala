@@ -1,5 +1,7 @@
 package fpinscala.exercises.datastructures
 
+import scala.annotation.tailrec
+
 /** `List` data type, parameterized on a type, `A`. */
 enum List[+A]:
   /** A `List` data constructor representing the empty list. */
@@ -24,7 +26,7 @@ object List: // `List` companion object. Contains functions for creating and wor
     else Cons(as.head, apply(as.tail*))
 
   @annotation.nowarn // Scala gives a hint here via a warning, so let's disable that
-  val result = List(1,2,3,4,5) match
+  val result: Any = List(1,2,3,4,5) match
     case Cons(x, Cons(2, Cons(4, _))) => x
     case Nil => 42
     case Cons(x, Cons(y, Cons(3, Cons(4, _)))) => x + y
@@ -56,15 +58,17 @@ object List: // `List` companion object. Contains functions for creating and wor
     l match
       case Nil => sys.error("message")
       case Cons(_, xs) => Cons(h, xs)
+  @tailrec
   def drop[A](l: List[A], n: Int): List[A] =
     if n <= 0 then l
     else l match
       case Nil => Nil
       case Cons(_, xs) => drop(xs, n-1)
 
+  @tailrec
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] =
     l match
-      case Cons(x,xs) if(f(x)) => dropWhile(xs, f)
+      case Cons(x,xs) if f(x) => dropWhile(xs, f)
       case _ => l
 
   def init[A](l: List[A]): List[A] =
@@ -127,4 +131,15 @@ object List: // `List` companion object. Contains functions for creating and wor
     case (_, Nil) => Nil
     case (Cons(h1,t1), Cons(h2,t2)) => Cons(f(h1,h2), zipWith(t1,t2,f))
 
-  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = ???
+  @tailrec
+  def startsWith[A](l: List[A], prefix: List[A]): Boolean = (l, prefix) match
+    case (_, Nil) => true
+    case (Cons(h1, t1), Cons(h2, t2)) if h1 == h2  => startsWith(t1, t2)
+    case (_, _) => false
+
+  @tailrec
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = sup match
+    case Nil => sub == Nil
+    case _ if startsWith(sup, sub) => true
+    case Cons(h, t) => hasSubsequence(t, sub)
+
